@@ -4,7 +4,7 @@ My solutions for the exercises of the University of Helsinki's Full Stack Open c
 
 ## Course Progress
 
-| Part  |   Status    | Exercises |
-| :---: | :---------: | :-------: |
-|   0   |   Ongoing   |    3/6    |
+| Part  |   Status    | Exercises | Date Finished |
+| :---: | :---------: | :-------: | :-----------: |
+| 0 | Submitted | 6/6 | 17 June 2025 |
 
