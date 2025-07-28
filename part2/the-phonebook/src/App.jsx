@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import phonebookServices from './services/phonebook'
 import Person from './components/Person'
 import PersonForm from './components/PersonForm'
 import Filter from './components/Filter'
@@ -11,12 +11,9 @@ const App = () => {
   const [filterName, setFilterName] = useState('')
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then((response) => {
-        console.log('fetch successfull')
-        setPersons(response.data)
-      })
+    phonebookServices
+      .getAll()
+      .then(persons => setPersons(persons))
   }, [])
 
   const handleAdd = (event) => {
@@ -31,12 +28,25 @@ const App = () => {
     const nameObj = {
       name: newName,
       number: newNumber,
-      id: persons.length + 1
     }
 
-    setPersons(persons.concat(nameObj))
-    setNewName('')
-    setNewNumber('')
+    phonebookServices
+      .create(nameObj)
+      .then(entry => {
+        setPersons(persons.concat(entry))
+        setNewName('')
+        setNewNumber('')
+      })
+  }
+
+  const removeEntry = (id) => {
+    if (window.confirm(`Delete ${(persons.find(p => p.id === id)).name}`)) {
+      phonebookServices
+        .remove(id)
+        .then(() => {
+          setPersons(persons.filter(p => p.id !== id))
+        })
+    }
   }
 
   const handleNameChange = (event) => setNewName(event.target.value)
@@ -58,7 +68,11 @@ const App = () => {
       />
       
       <h3>Numbers</h3>
-      <Person filterName={filterName} persons={persons} />
+      <Person 
+        filterName={filterName} 
+        persons={persons}
+        onDeleteClick={removeEntry}
+      />
     </div>
   )
 }

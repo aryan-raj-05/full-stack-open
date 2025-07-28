@@ -1,6 +1,10 @@
-const PersonLine = ({ person }) => <div>{person.name} {person.number}</div>
+const PersonLine = ({ person, onClick }) => {
+  return (
+    <div>{person.name} {person.number} <button onClick={onClick}>delete</button></div>
+  )
+}
 
-const Person = ({ filterName, persons }) => {
+const Person = ({ filterName, persons, onDeleteClick }) => {
   const filter = () => {
     return persons.filter((person) => person.name.trim().toLowerCase() === filterName.trim().toLowerCase())
   }
@@ -9,7 +13,7 @@ const Person = ({ filterName, persons }) => {
 
   return (
     <div>
-      {filteredPersons.map((person) => <PersonLine key={person.id} person={person}/>)}
+      {filteredPersons.map((person) => <PersonLine key={person.id} person={person} onClick={() => onDeleteClick(person.id)} />)}
     </div>
   )
 }
