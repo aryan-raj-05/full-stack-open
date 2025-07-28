@@ -18,16 +18,22 @@ const App = () => {
 
   const handleAdd = (event) => {
     event.preventDefault()
-
-    const contains = persons.find((person) => person.name === newName)
-    if (contains) {
-      alert(`${newName} is already added to phonebook`)
-      return
-    }
-
     const nameObj = {
       name: newName,
       number: newNumber,
+    }
+
+    const contains = persons.find((person) => person.name === newName)
+    const message = contains ? `${contains.name} is already added to phonebook, replace the old number with a new one?` : null
+    if (contains && window.confirm(message)) {
+      phonebookServices
+        .update(contains.id, nameObj)
+        .then((data) => {
+          setPersons(persons.map(p => p.name === newName ? data : p))
+          setNewName('')
+          setNewNumber('')
+        })
+      return
     }
 
     phonebookServices
