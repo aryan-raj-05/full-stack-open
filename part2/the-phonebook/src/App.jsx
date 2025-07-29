@@ -36,7 +36,22 @@ const App = () => {
           setPersons(persons.map(p => p.name === newName ? data : p))
           setNewName('')
           setNewNumber('')
-          setNotification(`Updated ${newName}`)
+          setNotification({
+            type: 'success',
+            message: `Updated ${newName}`
+          })
+          setTimeout(() => {
+            setNotification(null)
+          }, 3000)
+        })
+        .catch(() => {
+          setNotification({
+            type: 'fail',
+            message: `Information of ${newName} has already been removed from server`
+          })
+          setPersons(persons.filter(p => p.name !== newName))
+          setNewName('')
+          setNewNumber('')
           setTimeout(() => {
             setNotification(null)
           }, 3000)
@@ -50,7 +65,10 @@ const App = () => {
         setPersons(persons.concat(entry))
         setNewName('')
         setNewNumber('')
-        setNotification(`Added ${newName}`)
+        setNotification({
+          type: 'success',
+          message: `Added ${newName}`
+        })
         setTimeout(() => {
           setNotification(null)
         }, 3000)
@@ -74,7 +92,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={notification} />
+      <Notification notification={notification} />
       <Filter filterName={filterName} handleFilterNameChange={handleFilterNameChange} />
 
       <h3>add a new</h3>
