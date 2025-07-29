@@ -3,12 +3,14 @@ import phonebookServices from './services/phonebook'
 import Person from './components/Person'
 import PersonForm from './components/PersonForm'
 import Filter from './components/Filter'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterName, setFilterName] = useState('')
+  const [notification, setNotification] = useState(null)
 
   useEffect(() => {
     phonebookServices
@@ -24,7 +26,9 @@ const App = () => {
     }
 
     const contains = persons.find((person) => person.name === newName)
-    const message = contains ? `${contains.name} is already added to phonebook, replace the old number with a new one?` : null
+    const message = contains 
+      ? `${contains.name} is already added to phonebook, replace the old number with a new one?` 
+      : null
     if (contains && window.confirm(message)) {
       phonebookServices
         .update(contains.id, nameObj)
@@ -32,6 +36,10 @@ const App = () => {
           setPersons(persons.map(p => p.name === newName ? data : p))
           setNewName('')
           setNewNumber('')
+          setNotification(`Updated ${newName}`)
+          setTimeout(() => {
+            setNotification(null)
+          }, 3000)
         })
       return
     }
@@ -42,6 +50,10 @@ const App = () => {
         setPersons(persons.concat(entry))
         setNewName('')
         setNewNumber('')
+        setNotification(`Added ${newName}`)
+        setTimeout(() => {
+          setNotification(null)
+        }, 3000)
       })
   }
 
@@ -62,6 +74,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notification} />
       <Filter filterName={filterName} handleFilterNameChange={handleFilterNameChange} />
 
       <h3>add a new</h3>
