@@ -29,10 +29,14 @@ const App = () => {
     ))
   }
 
+  const showOnClick = (id) => {
+    setFilteredCountries(countries.filter(c => c.cca3 === id))
+  }
+
   return (
     <div>
       <div>find countries <input value={inputVal} onChange={handleInputValChange} /></div>
-      <Display filteredCountries={filteredCountries} />
+      <Display filteredCountries={filteredCountries} onShow={showOnClick} />
     </div>
   )
 }
