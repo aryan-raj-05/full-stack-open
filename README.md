@@ -8,3 +8,4 @@ My solutions for the exercises of the University of Helsinki's Full Stack Open c
 | :---: | :---------: | :-------: | :-----------: |
 | 0 | Submitted | 6/6 | 17 June 2025 |
 | 1 | Submitted | 14/14 | 24 July 2025 |
+| 2 | Submitted | 20/20 | 31 July 2025 |
