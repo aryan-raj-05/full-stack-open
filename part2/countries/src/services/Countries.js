@@ -3,8 +3,9 @@ const baseUrl = 'https://studies.cs.helsinki.fi/restcountries/api'
 const api = import.meta.env.VITE_SOME_KEY
 
 const getAll = () => {
-  const request = axios.get(`${baseUrl}/all`)
-  return request.then(response => response.data)
+  return axios
+    .get(`${baseUrl}/all`)
+    .then(response => response.data)
 }
 
 const getWeather = (lat, lon) => {
