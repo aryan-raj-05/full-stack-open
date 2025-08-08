@@ -5,13 +5,14 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "build:ui": "rm -rf dist && cd ../part2/the-phonebook/ && npm run build && cp -r dist ../../part3/",
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
     "dev": "node --watch index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Aryan Raj",
   "license": "MIT",
   "dependencies": {
-    "cors": "^2.8.5",
     "express": "^4.21.2",
     "morgan": "^1.10.1"
   }
