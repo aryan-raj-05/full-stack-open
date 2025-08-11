@@ -73,6 +73,18 @@ const App = () => {
           setNotification(null)
         }, 3000)
       })
+      .catch(error => {
+        console.log(error.response.data.error)
+        setNotification({
+          type: 'fail',
+          message: error.response.data.error
+        })
+        setNewName('')
+        setNewNumber('')
+        setTimeout(() => {
+          setNotification(null)
+        }, 3000)
+      })
   }
 
   const removeEntry = (id) => {
