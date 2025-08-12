@@ -20,7 +20,18 @@ const personSchema = new mongoose.Schema({
         minLength: 3,
         required: true
     },
-    number: String,
+    number: {
+        type: String,
+        minLength: 8,
+        validate: {
+            validator: (phoneNum) => {
+                const splitArray = phoneNum.split('-')
+                return (splitArray.length === 2) && 
+                    (splitArray[0].length === 2 || splitArray[0].length === 3)
+            }, 
+            message: 'malformatted number'
+        }
+    },
 })
 
 personSchema.set('toJSON', {
