@@ -83,6 +83,26 @@ test('a valid blog can be added', async () => {
     assert(titles.includes(blogToAdd.title))
 })
 
+test('default value for likes is zero', async () => {
+    const blogToAdd = {
+        title: 'Bitcoin: A Peer-to-Peer Electronic Cash System',
+        author: 'Satoshi Nakamoto',
+        url: 'null.com',
+    }
+
+    await api
+        .post('/api/blogs')
+        .send(blogToAdd)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = (await api.get('/api/blogs')).body
+    assert.strictEqual(blogsAtEnd.length, initialBlogs.length + 1)
+
+    const blogRecentlyAdded = blogsAtEnd.filter(b => b.title === blogToAdd.title)
+    assert.strictEqual(blogRecentlyAdded[0].likes, 0)
+})
+
 after(async () => {
     await mongoose.connection.close()
 })
