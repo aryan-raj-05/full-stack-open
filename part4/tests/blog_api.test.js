@@ -3,46 +3,14 @@ const { test, after, beforeEach } = require('node:test')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
+const helper = require('./test_helper')
 const Blog = require('../models/blog')
 
 const api = supertest(app)
 
-const initialBlogs = [
-    {
-        title: "React patterns",
-        author: "Michael Chan",
-        url: "https://reactpatterns.com/",
-        likes: 7,
-    },
-    {
-        title: "Canonical string reduction",
-        author: "Edsger W. Dijkstra",
-        url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-        likes: 12,
-    },
-    {
-        title: "First class tests",
-        author: "Robert C. Martin",
-        url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
-        likes: 10,
-    },
-    {
-        title: "TDD harms architecture",
-        author: "Robert C. Martin",
-        url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
-        likes: 0,
-    },
-    {
-        title: "Type wars",
-        author: "Robert C. Martin",
-        url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
-        likes: 2,
-    }  
-]
-
 beforeEach(async () => {
     await Blog.deleteMany({})
-    await Blog.insertMany(initialBlogs)
+    await Blog.insertMany(helper.initialBlogs)
 })
 
 test('blogs are returned as json', async () => {
@@ -54,11 +22,11 @@ test('blogs are returned as json', async () => {
 
 test('correct number of blogs are returned', async () => {
     const response = await api.get('/api/blogs')
-    assert.strictEqual(response.body.length, initialBlogs.length)
+    assert.strictEqual(response.body.length, helper.initialBlogs.length)
 })
 
 test('blogs have unique identifier named id', async () => {
-    const blogs = (await api.get('/api/blogs')).body
+    const blogs = await helper.getBlogsInDB()
     assert(blogs.every(blog => blog.hasOwnProperty('id')))
 })
 
@@ -76,8 +44,8 @@ test('a valid blog can be added', async () => {
         .expect(201)
         .expect('Content-Type', /application\/json/)
 
-    const blogsAtEnd = (await api.get('/api/blogs')).body
-    assert.strictEqual(blogsAtEnd.length, initialBlogs.length + 1)
+    const blogsAtEnd = await helper.getBlogsInDB()
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
 
     const titles = blogsAtEnd.map(b => b.title)
     assert(titles.includes(blogToAdd.title))
@@ -96,8 +64,8 @@ test('default value for likes is zero', async () => {
         .expect(201)
         .expect('Content-Type', /application\/json/)
 
-    const blogsAtEnd = (await api.get('/api/blogs')).body
-    assert.strictEqual(blogsAtEnd.length, initialBlogs.length + 1)
+    const blogsAtEnd = await helper.getBlogsInDB()
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
 
     const blogRecentlyAdded = blogsAtEnd.filter(b => b.title === blogToAdd.title)
     assert.strictEqual(blogRecentlyAdded[0].likes, 0)
