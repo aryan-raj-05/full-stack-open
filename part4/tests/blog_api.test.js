@@ -15,12 +15,6 @@ const initialBlogs = [
         likes: 7,
     },
     {
-        title: "Go To Statement Considered Harmful",
-        author: "Edsger W. Dijkstra",
-        url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
-        likes: 5,
-    },
-    {
         title: "Canonical string reduction",
         author: "Edsger W. Dijkstra",
         url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
@@ -69,16 +63,16 @@ test('blogs have unique identifier named id', async () => {
 })
 
 test('a valid blog can be added', async () => {
-    const blog = new Blog({
+    const blogToAdd = {
         title: 'Go To Statement Considered Harmful',
         author: 'Edsger W. Dijkstra',
         url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
         likes: 5,
-    })
+    }
 
     await api
         .post('/api/blogs')
-        .send(blog)
+        .send(blogToAdd)
         .expect(201)
         .expect('Content-Type', /application\/json/)
 
@@ -86,7 +80,7 @@ test('a valid blog can be added', async () => {
     assert.strictEqual(blogsAtEnd.length, initialBlogs.length + 1)
 
     const titles = blogsAtEnd.map(b => b.title)
-    assert(titles.includes(blog.title))
+    assert(titles.includes(blogToAdd.title))
 })
 
 after(async () => {
