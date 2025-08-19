@@ -71,6 +71,32 @@ test('default value for likes is zero', async () => {
     assert.strictEqual(blogRecentlyAdded[0].likes, 0)
 })
 
+test('handles missing title appropriately', async () => {
+    const missingTitleBlog = {
+        author: 'Brian Kerningham',
+        url: 'null.com',
+        likes: 34,
+    }
+
+    await api
+        .post('/api/blogs')
+        .send(missingTitleBlog)
+        .expect(400)
+})
+
+test('handles missing url appropriately', async () => {
+    const missingURLBlog = {
+        title: 'Algorithms',
+        author: 'Robert Sedgewick',
+        likes: 55,
+    }
+
+    await api
+        .post('/api/blogs')
+        .send(missingURLBlog)
+        .expect(400)
+})
+
 after(async () => {
     await mongoose.connection.close()
 })
