@@ -108,6 +108,19 @@ test('deletes blogs appropriately', async () => {
     assert.strictEqual(helper.initialBlogs.length - 1, blogsAfterDeletion.length)
 })
 
+test('can update already existing blogs', async () => {
+    const blogToUpdate = (await helper.getBlogsInDB())[0]
+    const newBlog = { ...blogToUpdate, likes: blogToUpdate.likes + 100 }
+
+    const response = await api
+        .put(`/api/blogs/${blogToUpdate.id}`)
+        .send(newBlog)
+        .expect(200)
+
+    assert.strictEqual(response.body.likes, newBlog.likes)
+    assert.strictEqual(response.body.id, newBlog.id)
+})
+
 after(async () => {
     await mongoose.connection.close()
 })
