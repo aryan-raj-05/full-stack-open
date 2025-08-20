@@ -97,6 +97,17 @@ test('handles missing url appropriately', async () => {
         .expect(400)
 })
 
+test('deletes blogs appropriately', async () => {
+    const blogToDelete = (await helper.getBlogsInDB())[0]
+
+    await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .expect(204)
+
+    const blogsAfterDeletion = await helper.getBlogsInDB()
+    assert.strictEqual(helper.initialBlogs.length - 1, blogsAfterDeletion.length)
+})
+
 after(async () => {
     await mongoose.connection.close()
 })
