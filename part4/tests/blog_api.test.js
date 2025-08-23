@@ -27,7 +27,7 @@ test('correct number of blogs are returned', async () => {
 
 test('blogs have unique identifier named id', async () => {
   const blogs = await helper.getBlogsInDB()
-  assert(blogs.every(blog => blog.hasOwnProperty('id')))
+  assert(blogs.every(blog => Object.prototype.hasOwnProperty.call(blog, 'id')))
 })
 
 test('a valid blog can be added', async () => {
