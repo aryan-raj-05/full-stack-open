@@ -11,13 +11,13 @@ const app = express()
 logger.info('connection to', config.MONGODB_URI)
 
 mongoose
-    .connect(config.MONGODB_URI)
-    .then(() => {
-        logger.info('connected to MongoDB')
-    })
-    .catch((error) => {
-        logger.error('error connecting to MongoDB:', error.message)
-    })
+  .connect(config.MONGODB_URI)
+  .then(() => {
+    logger.info('connected to MongoDB')
+  })
+  .catch((error) => {
+    logger.error('error connecting to MongoDB:', error.message)
+  })
 
 app.use(express.json())
 
