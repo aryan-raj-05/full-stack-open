@@ -21,6 +21,7 @@ mongoose
   })
 
 app.use(express.json())
+app.use(middleware.tokenExtracter)
 
 app.use('/api/blogs', blogRouter)
 app.use('/api/users', usersRouter)
