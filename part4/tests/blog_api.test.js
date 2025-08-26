@@ -5,12 +5,15 @@ const supertest = require('supertest')
 const app = require('../app')
 const helper = require('./test_helper')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 const api = supertest(app)
 
 beforeEach(async () => {
   await Blog.deleteMany({})
   await Blog.insertMany(helper.initialBlogs)
+  await User.deleteMany({})
+  await helper.addLoginUser()
 })
 
 describe('database and server are communicating', () => {
@@ -34,6 +37,8 @@ describe('database and server are communicating', () => {
 
 describe('adding new blogs', () => {
   test('a valid blog can be added', async () => {
+    const loggedInUser = await api.post('/api/login').send(helper.loginUser)
+
     const blogToAdd = {
       title: 'Go To Statement Considered Harmful',
       author: 'Edsger W. Dijkstra',
@@ -41,8 +46,9 @@ describe('adding new blogs', () => {
       likes: 5,
     }
 
-    await api
+    const response = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${loggedInUser.body.token}`)
       .send(blogToAdd)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -50,19 +56,40 @@ describe('adding new blogs', () => {
     const blogsAtEnd = await helper.getBlogsInDB()
     assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
 
-    const titles = blogsAtEnd.map(b => b.title)
-    assert(titles.includes(blogToAdd.title))
+    assert.strictEqual(blogToAdd.title,   response.body.title)
+    assert.strictEqual(blogToAdd.author,  response.body.author)
+    assert.strictEqual(blogToAdd.url,     response.body.url)
+    assert.strictEqual(blogToAdd.likes,   response.body.likes)
+
+    assert.strictEqual(response.body.user, (await User.findOne({ username: helper.loginUser.username }))._id.toString())
+  })
+
+  test('blogs can not be added without authorization', async () => {
+    const testBlog = {
+      title: 'Attention is all You Need',
+      author: 'Whoever',
+      url: 'test.com',
+      likes: 97
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(testBlog)
+      .expect(401)
   })
 
   test('if there is no value for likes then it should default to zero', async () => {
+    const loggedInUser = await api.post('/api/login').send(helper.loginUser)
+
     const blogToAdd = {
       title: 'Bitcoin: A Peer-to-Peer Electronic Cash System',
       author: 'Satoshi Nakamoto',
       url: 'null.com',
     }
 
-    await api
+    const response = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${loggedInUser.body.token}`)
       .send(blogToAdd)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -70,11 +97,17 @@ describe('adding new blogs', () => {
     const blogsAtEnd = await helper.getBlogsInDB()
     assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
 
-    const blogRecentlyAdded = blogsAtEnd.filter(b => b.title === blogToAdd.title)
-    assert.strictEqual(blogRecentlyAdded[0].likes, 0)
+    assert.strictEqual(response.body.title, blogToAdd.title)
+    assert.strictEqual(response.body.author, blogToAdd.author)
+    assert.strictEqual(response.body.url, blogToAdd.url)
+    assert.strictEqual(response.body.likes, 0)
+
+    assert.strictEqual(response.body.user, (await User.findOne({ username: helper.loginUser.username }))._id.toString())
   })
 
   test('returns 400 when title is missing', async () => {
+    const loggedInUser = await api.post('/api/login').send(helper.loginUser)
+
     const missingTitleBlog = {
       author: 'Brian Kerningham',
       url: 'null.com',
@@ -83,11 +116,14 @@ describe('adding new blogs', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${loggedInUser.body.token}`)
       .send(missingTitleBlog)
       .expect(400)
   })
 
   test('returns 400 when URL is missing', async () => {
+    const loggedInUser = await api.post('/api/login').send(helper.loginUser)
+
     const missingURLBlog = {
       title: 'Algorithms',
       author: 'Robert Sedgewick',
@@ -96,20 +132,31 @@ describe('adding new blogs', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${loggedInUser.body.token}`)
       .send(missingURLBlog)
       .expect(400)
   })
 })
 
-test('deletes blogs appropriately', async () => {
-  const blogToDelete = (await helper.getBlogsInDB())[0]
+describe('deletion of blogs', () => {
+  test('should succeed with code 204 if id is valid', async () => {
+    const loggedInUser = await api.post('/api/login').send(helper.loginUser)
 
-  await api
-    .delete(`/api/blogs/${blogToDelete.id}`)
-    .expect(204)
+    const response = await api
+      .post('/api/blogs')
+      .set('Authorization', `Bearer ${loggedInUser.body.token}`)
+      .send(helper.newBlog)
 
-  const blogsAfterDeletion = await helper.getBlogsInDB()
-  assert.strictEqual(helper.initialBlogs.length - 1, blogsAfterDeletion.length)
+    const blogsAfterAddition = await helper.getBlogsInDB()
+
+    await api
+      .delete(`/api/blogs/${response.body.id}`)
+      .set('Authorization', `Bearer ${loggedInUser.body.token}`)
+      .expect(204)
+
+    const blogsAfterDeletion = await helper.getBlogsInDB()
+    assert.strictEqual(blogsAfterDeletion.length, blogsAfterAddition.length - 1)
+  })
 })
 
 test('can update already existing blogs', async () => {
