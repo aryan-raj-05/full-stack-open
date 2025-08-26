@@ -1,5 +1,5 @@
 const assert = require('node:assert')
-const { test, after, beforeEach } = require('node:test')
+const { test, after, beforeEach, describe } = require('node:test')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
@@ -13,88 +13,92 @@ beforeEach(async () => {
   await Blog.insertMany(helper.initialBlogs)
 })
 
-test('blogs are returned as json', async () => {
-  await api
-    .get('/api/blogs')
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
+describe('database and server are communicating', () => {
+  test('blogs are returned as json', async () => {
+    await api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+  })
+
+  test('correct number of blogs are returned', async () => {
+    const response = await api.get('/api/blogs')
+    assert.strictEqual(response.body.length, helper.initialBlogs.length)
+  })
+
+  test('blogs have unique identifier named id', async () => {
+    const blogs = await helper.getBlogsInDB()
+    assert(blogs.every(blog => Object.prototype.hasOwnProperty.call(blog, 'id')))
+  })
 })
 
-test('correct number of blogs are returned', async () => {
-  const response = await api.get('/api/blogs')
-  assert.strictEqual(response.body.length, helper.initialBlogs.length)
-})
+describe('adding new blogs', () => {
+  test('a valid blog can be added', async () => {
+    const blogToAdd = {
+      title: 'Go To Statement Considered Harmful',
+      author: 'Edsger W. Dijkstra',
+      url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
+      likes: 5,
+    }
 
-test('blogs have unique identifier named id', async () => {
-  const blogs = await helper.getBlogsInDB()
-  assert(blogs.every(blog => Object.prototype.hasOwnProperty.call(blog, 'id')))
-})
+    await api
+      .post('/api/blogs')
+      .send(blogToAdd)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
 
-test('a valid blog can be added', async () => {
-  const blogToAdd = {
-    title: 'Go To Statement Considered Harmful',
-    author: 'Edsger W. Dijkstra',
-    url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
-    likes: 5,
-  }
+    const blogsAtEnd = await helper.getBlogsInDB()
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
 
-  await api
-    .post('/api/blogs')
-    .send(blogToAdd)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
+    const titles = blogsAtEnd.map(b => b.title)
+    assert(titles.includes(blogToAdd.title))
+  })
 
-  const blogsAtEnd = await helper.getBlogsInDB()
-  assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
+  test('if there is no value for likes then it should default to zero', async () => {
+    const blogToAdd = {
+      title: 'Bitcoin: A Peer-to-Peer Electronic Cash System',
+      author: 'Satoshi Nakamoto',
+      url: 'null.com',
+    }
 
-  const titles = blogsAtEnd.map(b => b.title)
-  assert(titles.includes(blogToAdd.title))
-})
+    await api
+      .post('/api/blogs')
+      .send(blogToAdd)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
 
-test('default value for likes is zero', async () => {
-  const blogToAdd = {
-    title: 'Bitcoin: A Peer-to-Peer Electronic Cash System',
-    author: 'Satoshi Nakamoto',
-    url: 'null.com',
-  }
+    const blogsAtEnd = await helper.getBlogsInDB()
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
 
-  await api
-    .post('/api/blogs')
-    .send(blogToAdd)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
+    const blogRecentlyAdded = blogsAtEnd.filter(b => b.title === blogToAdd.title)
+    assert.strictEqual(blogRecentlyAdded[0].likes, 0)
+  })
 
-  const blogsAtEnd = await helper.getBlogsInDB()
-  assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
+  test('returns 400 when title is missing', async () => {
+    const missingTitleBlog = {
+      author: 'Brian Kerningham',
+      url: 'null.com',
+      likes: 34,
+    }
 
-  const blogRecentlyAdded = blogsAtEnd.filter(b => b.title === blogToAdd.title)
-  assert.strictEqual(blogRecentlyAdded[0].likes, 0)
-})
+    await api
+      .post('/api/blogs')
+      .send(missingTitleBlog)
+      .expect(400)
+  })
 
-test('handles missing title appropriately', async () => {
-  const missingTitleBlog = {
-    author: 'Brian Kerningham',
-    url: 'null.com',
-    likes: 34,
-  }
+  test('returns 400 when URL is missing', async () => {
+    const missingURLBlog = {
+      title: 'Algorithms',
+      author: 'Robert Sedgewick',
+      likes: 55,
+    }
 
-  await api
-    .post('/api/blogs')
-    .send(missingTitleBlog)
-    .expect(400)
-})
-
-test('handles missing url appropriately', async () => {
-  const missingURLBlog = {
-    title: 'Algorithms',
-    author: 'Robert Sedgewick',
-    likes: 55,
-  }
-
-  await api
-    .post('/api/blogs')
-    .send(missingURLBlog)
-    .expect(400)
+    await api
+      .post('/api/blogs')
+      .send(missingURLBlog)
+      .expect(400)
+  })
 })
 
 test('deletes blogs appropriately', async () => {
