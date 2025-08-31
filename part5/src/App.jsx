@@ -4,12 +4,53 @@ import blogService from './services/blogs'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [user, setUser] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
     )  
   }, [])
+
+  const handleLogin = async (event) => {
+    event.preventDefault()
+    console.log('loggin with username', username, 'and password', password)
+  }
+
+  if (!user) {
+    return (
+      <div>
+        <h2>login to application</h2>
+        <div>{errorMessage}</div>
+        <form onSubmit={handleLogin}>
+          <div>
+            <label>
+              username
+              <input
+                type="text"
+                value={username}
+                onChange={({ target }) => setUsername(target.value)}
+              />
+            </label>
+          </div>
+          <div>
+            <label>
+              password
+              <input 
+                type="password"
+                value={password}
+                onChange={({ target }) => setPassword(target.value)}
+              />
+            </label>
+          </div>
+          <button type="submit">login</button>
+        </form>
+      </div>
+    )
+  }
 
   return (
     <div>
