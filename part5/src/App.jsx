@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import BlogForm from './components/BlogForm'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -9,10 +10,15 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [newBlog, setNewBlog] = useState({
+    title: '',
+    author: '',
+    url: '',
+  })
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs( blogs )
+      setBlogs(blogs)
     )  
   }, [])
 
@@ -21,6 +27,7 @@ const App = () => {
     if (loggedInUser) {
       const user = JSON.parse(loggedInUser)
       setUser(user)
+      blogService.setToken(user.token)
     }
   }, [])
 
@@ -33,6 +40,7 @@ const App = () => {
         'loggedInUser', JSON.stringify(user)
       )
 
+      blogService.setToken(user.token)
       setUser(user)
       setUsername('')
       setPassword('')
@@ -47,6 +55,7 @@ const App = () => {
   const handleLogout = () => {
     window.localStorage.removeItem('loggedInUser')
     setUser(null)
+    setNewBlog({ title: '', author: '', url: '' })
   }
 
   if (!user) {
@@ -86,6 +95,12 @@ const App = () => {
       <h2>blogs</h2>
       <div>{user.name} logged in <button onClick={handleLogout}>logout</button> </div>
       <br />
+      <BlogForm
+        newBlog={newBlog}
+        setNewBlog={setNewBlog}
+        blogs={blogs}
+        setBlogs={setBlogs}
+      />
       <div>
         {blogs.map(blog => <Blog key={blog.id} blog={blog} />)}
       </div>
