@@ -1,6 +1,6 @@
 import blogService from '../services/blogs'
 
-const BlogForm = ({ newBlog, setNewBlog, blogs, setBlogs }) => {
+const BlogForm = ({ newBlog, setNewBlog, blogs, setBlogs, setNotification }) => {
   const handleSubmit = async (event) => {
     event.preventDefault()
 
@@ -12,6 +12,15 @@ const BlogForm = ({ newBlog, setNewBlog, blogs, setBlogs }) => {
       author: '',
       url: '',
     })
+
+    setNotification({
+      message: `a new blog ${response.title} by ${response.author} added`,
+      isError: false,
+    })
+
+    setTimeout(() => {
+      setNotification(null)
+    }, 5000)
   }
 
   return (
