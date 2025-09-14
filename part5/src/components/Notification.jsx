@@ -1,8 +1,6 @@
 const Notification = ({ notification }) => {
   if (notification === null) {
-    return (
-      null
-    )
+    return null
   }
 
   const className = notification.isError

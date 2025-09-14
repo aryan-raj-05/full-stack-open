@@ -1,6 +1,11 @@
 import blogService from '../services/blogs'
 
-const BlogForm = ({ newBlog, setNewBlog, blogs, setBlogs, setNotification }) => {
+const BlogForm = ({
+                    newBlog,
+                    setNewBlog,
+                    blogs,
+                    setBlogs,
+                    setNotification }) => {
   const handleSubmit = async (event) => {
     event.preventDefault()
 
