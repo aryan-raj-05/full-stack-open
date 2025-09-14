@@ -12,11 +12,6 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [notification, setNotification] = useState(null)
-  const [newBlog, setNewBlog] = useState({
-    title: '',
-    author: '',
-    url: '',
-  })
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -64,7 +59,18 @@ const App = () => {
   const handleLogout = () => {
     window.localStorage.removeItem('loggedInUser')
     setUser(null)
-    setNewBlog({ title: '', author: '', url: '' })
+  }
+
+  const createBlog = async (newBlog) => {
+    const data = await blogService.create(newBlog)
+    setBlogs(blogs.concat(data))
+    setNotification({
+      message: `a new blog ${data.title} by ${data.author} added`,
+      isError: false,
+    })
+    setTimeout(() => {
+      setNotification(null)
+    }, 5000)
   }
 
   if (!user) {
@@ -106,13 +112,7 @@ const App = () => {
       <div>{user.name} logged in <button onClick={handleLogout}>logout</button> </div>
       <br />
       <Togglable buttonLabel="create new blog">
-        <BlogForm
-          newBlog={newBlog}
-          setNewBlog={setNewBlog}
-          blogs={blogs}
-          setBlogs={setBlogs}
-          setNotification={setNotification}
-        />
+        <BlogForm createBlog={createBlog} />
       </Togglable>
       <div>
         {blogs.map(blog => <Blog key={blog.id} blog={blog} />)}
