@@ -107,3 +107,4 @@ typings/
 .DS_Store
 requests/
 .vscode/
+.idea/
