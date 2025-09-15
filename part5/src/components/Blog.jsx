@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import Button from "./Button.jsx";
+import Button from "./Button.jsx"
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, onLike }) => {
   const [visible, setVisible] = useState(false)
 
   const buttonPrompt = visible ? 'hide' : 'view'
@@ -9,10 +9,6 @@ const Blog = ({ blog }) => {
 
   const toggleView = () => {
     setVisible(!visible)
-  }
-
-  const likeBlog = () => {
-    console.log("click")
   }
 
   const blogStyle = {
@@ -32,7 +28,7 @@ const Blog = ({ blog }) => {
         <div style={showWhenVisible}>
           <div>{blog.url}</div>
           <div>
-            {blog.likes} <Button onclick={likeBlog} text="like"/>
+            {blog.likes} <Button onclick={() => onLike(blog)} text="like"/>
           </div>
           <div>{blog.user.name}</div>
         </div>
