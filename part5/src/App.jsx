@@ -16,7 +16,7 @@ const App = () => {
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs(blogs)
-    )  
+    )
   }, [])
 
   useEffect(() => {
@@ -125,12 +125,19 @@ const App = () => {
         <BlogForm createBlog={createBlog} />
       </Togglable>
       <div>
-        {blogs.map(blog =>
-          <Blog
-            key={blog.id}
-            blog={blog}
-            onLike={handleLikes}
-          />)}
+        {blogs
+          .sort((a, b) => {
+            if (a.likes > b.likes) return -1
+            else if (a.likes < b.likes) return 1
+            return 0
+          })
+          .map(blog =>
+            <Blog
+              key={blog.id}
+              blog={blog}
+              onLike={handleLikes}
+            />)
+        }
       </div>
     </div>
   )
