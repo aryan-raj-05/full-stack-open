@@ -1,10 +1,19 @@
 import { useState } from 'react'
 import Button from './Button'
 
-const Blog = ({ blog, onLike }) => {
+const Blog = ({ loggedInUser, blog, onLike, onDelete }) => {
   const [visible, setVisible] = useState(false)
 
   const buttonPrompt = visible ? 'hide' : 'view'
+
+  const showIfBelongsToUser = {
+    display: loggedInUser === blog.user.name ? '' : 'none',
+    marginBottom: '4px',
+    backgroundColor: 'blue',
+    borderRadius: '5px',
+    border: '2px none'
+  }
+
   const showWhenVisible = { display : visible ? '' : 'none' }
 
   const toggleView = () => {
@@ -31,6 +40,7 @@ const Blog = ({ blog, onLike }) => {
             {blog.likes} <Button onclick={() => onLike(blog)} text="like"/>
           </div>
           <div>{blog.user.name}</div>
+          <Button onclick={() => onDelete(blog)} text='remove' style={showIfBelongsToUser}/>
         </div>
       </div>
     </div>

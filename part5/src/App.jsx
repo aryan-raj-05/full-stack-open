@@ -75,6 +75,19 @@ const App = () => {
     }
   }
 
+  const handleDelete = (blog) => {
+    const prompt = `Remove blog ${blog.title} by ${blog.author}`
+    if (window.confirm(prompt)) {
+      blogService
+        .deleteBlog(blog)
+        .then(() => { setBlogs(blogs.filter(b => b.id !== blog.id)) })
+        .catch(err => {
+          notify('deletion failed', true)
+          console.log('error:', err.message)
+        })
+    }
+  }
+
   if (!user) {
     return (
       <div>
@@ -99,9 +112,11 @@ const App = () => {
           .sort((a, b) => b.likes - a.likes)
           .map(blog =>
             <Blog
+              loggedInUser={user.name}
               key={blog.id}
               blog={blog}
               onLike={handleLikes}
+              onDelete={handleDelete}
             />)
         }
       </div>
