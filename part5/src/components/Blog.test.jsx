@@ -3,8 +3,13 @@ import userEvent from '@testing-library/user-event'
 import Blog from './Blog'
 
 describe('<Blog />', () => {
+  let blog
+  let loggedInUser
+  let mockLike
+  let mockDelete
+
   beforeEach(() => {
-    const blog = {
+    blog = {
       title: 'Testing React components',
       author: 'Kent C. Dodds',
       url: 'https://testing-library.com/',
@@ -12,9 +17,9 @@ describe('<Blog />', () => {
       user: { name: 'testuser' }
     }
 
-    const loggedInUser = 'testUser'
-    const mockLike = vi.fn()
-    const mockDelete = vi.fn()
+    loggedInUser = 'testUser'
+    mockLike = vi.fn()
+    mockDelete = vi.fn()
 
     render(
       <Blog
@@ -39,5 +44,15 @@ describe('<Blog />', () => {
 
     expect(screen.getByText('https://testing-library.com/')).toBeDefined()
     expect(screen.getByText('10')).toBeVisible()
+  })
+
+  test('when like button is cliked twice, the assiciated event handler is called twice', async () => {
+    const user = userEvent.setup()
+    const button = screen.getByText('like')
+
+    await user.click(button)
+    await user.click(button)
+
+    expect(mockLike.mock.calls).toHaveLength(2)
   })
 })
