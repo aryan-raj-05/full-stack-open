@@ -1,17 +1,17 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
-const { loginWith } = require('./helper')
+const { loginWith, createBlog } = require('./helper')
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
-    await request.post('http://localhost:3001/api/testing/reset')
-    await request.post('http://localhost:3001/api/users', {
+    await request.post('/api/testing/reset')
+    await request.post('/api/users', {
       data: {
         username: 'User',
         password: 'testPassword124',
         name: 'testUser'
       }
     })
-    await page.goto('http://localhost:5173')
+    await page.goto('/')
   })
 
   test('Login form is shown', async ({ page }) => {
@@ -35,6 +35,18 @@ describe('Blog app', () => {
       await expect(errorDiv).toHaveCSS('color', 'rgb(255, 0, 0)')
 
       await expect(page.getByText('testUser logged in')).not.toBeVisible()
+    })
+  })
+
+  describe('When logged in', () => {
+    beforeEach(async ({ page }) => {
+      loginWith(page, 'User', 'testPassword124')
+    })
+
+    test('a new blog can be created', async ({ page }) => {
+      createBlog(page, 'test title', 'test author')
+
+      await expect(page.getByText('test title test author')).toBeVisible()
     })
   })
 })
