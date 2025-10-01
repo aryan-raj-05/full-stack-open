@@ -1,0 +1,17 @@
+{
+  "name": "part5-e2e-playwright",
+  "version": "1.0.0",
+  "description": "End to End tests for Bloglist app tested with Playwright library",
+  "license": "ISC",
+  "author": "Aryan Raj",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test --project=chromium",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.1",
+    "@types/node": "^24.6.1"
+  }
+}
