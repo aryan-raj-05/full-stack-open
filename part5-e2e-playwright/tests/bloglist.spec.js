@@ -6,6 +6,8 @@ describe('Blog app', () => {
   })
 
   test('Login form is shown', async ({ page }) => {
-    
+    await expect(page.getByText('login to application')).toBeVisible()
+    await expect(page.getByText('username')).toBeVisible()
+    await expect(page.getByText('password')).toBeVisible()
   })
 })
