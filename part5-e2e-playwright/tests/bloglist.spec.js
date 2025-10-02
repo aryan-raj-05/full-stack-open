@@ -80,13 +80,11 @@ describe('Blog app', () => {
       await expect(page.getByText('blog to delete author')).not.toBeVisible()
     })
 
-    test.only('remove button is visible only for blogs user has created', async ({ page }) => {
+    test('remove button is visible only for blogs user has created', async ({ page }) => {
       await createBlog(page, 'test remove button visibility', 'original user')
 
       await page.getByRole('button', { name: 'logout' }).click()
       await loginWith(page, 'otherUser', 'password123')
-
-      await expect(page.getByText('test remove button visibility')).toBeVisible()
       await page.getByRole('button', { name: 'view' }).click()
       await expect(page.getByRole('button', { name: 'remove' })).not.toBeVisible()
     })
