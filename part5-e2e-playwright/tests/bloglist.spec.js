@@ -48,5 +48,29 @@ describe('Blog app', () => {
 
       await expect(page.getByText('test title test author')).toBeVisible()
     })
+
+    test('blogs can be liked', async ({ page }) => {
+      createBlog(page, 'new title', 'new author')
+
+      await page.getByRole('button', { name: 'view' }).click()
+
+      const initialLikesLocator = page.locator('text=/^\\d+ likes?$/')
+      const initialLikesText = await initialLikesLocator.textContent()
+      const initialLikes = parseInt(initialLikesText.match(/\d+/)[0], 10)
+
+      await page.getByRole('button', { name: 'like' }).click()
+
+      await expect(initialLikesLocator).toContainText(`${initialLikes + 1}`)
+    })
+
+    test('user can delete the blogs they have created', async ({ page }) => {
+      await createBlog(page, 'blog to delete', 'author')
+      
+      await page.getByRole('button', { name: 'view' }).click()
+      page.on('dialog', dialog => { dialog.accept() })
+      await page.getByRole('button', { name: 'remove' }).click()
+      
+      await expect(page.getByText('blog to delete author')).not.toBeVisible()
+    })
   })
 })
